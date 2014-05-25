@@ -15,10 +15,7 @@ case class Graph[V](vertices: Set[V] = Set.empty[V], edges: Set[(V, V)] = Set.em
    * @param edge The edge to be added.
    * @return a new Graph with the additional edge.
    */
-  def +(edge: (V, V)): Graph[V] = {
-    val (v1, v2) = edge
-    Graph(vertices.+(v1, v2), edges + edge)
-  }
+  def +(edge: (V, V)): Graph[V] = Graph(vertices.+(edge._1, edge._2), edges + edge)
 
   /*
   Since f(x) = 1/x is a strictly decreasing function, we can replace it by a
