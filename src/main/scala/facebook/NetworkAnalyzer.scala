@@ -5,7 +5,6 @@ import graph.Graph
 class NetworkAnalyzer(api: GraphApi) {
   /**
    * Returns a ranking of users based on their centrality value.
-   * @return
    */
   def centralityRanking(): List[User] = {
     val me = api.myself()
