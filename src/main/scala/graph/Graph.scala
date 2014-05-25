@@ -8,7 +8,8 @@ import scala.math.min
  * @param edges Set of edges.
  * @tparam V Type of the vertices.
  */
-case class Graph[V](vertices: Set[V] = Set.empty[V], edges: Set[(V, V)] = Set.empty[(V, V)]) {
+case class Graph[V](vertices: Set[V] = Set.empty[V],
+                    edges: Set[(V, V)] = Set.empty[(V, V)]) {
 
   /**
    * Adds a new edge to this graph.
@@ -21,18 +22,15 @@ case class Graph[V](vertices: Set[V] = Set.empty[V], edges: Set[(V, V)] = Set.em
   Since f(x) = 1/x is a strictly decreasing function, we can replace it by a
   less expensive function that is also strictly decreasing. In this case,
   f(x) = -x. And since the goal here is to build a ranking, we can use its
-  invers, f(x) = x, to generate a list sorted from the most central to the less
-  one.
+  inverse, f(x) = x, to generate a list sorted from the most central to the less
+  central.
    */
   lazy val ranking = vertices.toList sortBy farness
 
   def closeness(vertex: V): Double = 1.0 / farness(vertex)
 
-  def farness(vertex: V): Long = {
-    val seq = (List.empty[Long] /: vertices) {
-      (list, v) => (lengths get(vertex, v) getOrElse Infinity) :: list
-    }
-    seq.sum
+  def farness(vertex: V): Long = (0L /: vertices) {
+    (sum, v) => (lengths get(vertex, v) getOrElse Infinity) + sum
   }
 
   private val Infinity: Long = Long.MaxValue / 2

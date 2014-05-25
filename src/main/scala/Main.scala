@@ -1,4 +1,4 @@
-import facebook.NetworkAnalyzer.centralityRanking
+import facebook.{NetworkAnalyzer, GraphApi}
 import graph.Graph
 import java.util.Scanner
 import scala.io.Source
@@ -34,7 +34,8 @@ object Part2 {
   def main(args: Array[String]) {
     print("Token: ")
     val sc = new Scanner(System.in)
-    val ranking = centralityRanking(sc.nextLine())
+    val analyzer = new NetworkAnalyzer(new GraphApi(sc.nextLine()))
+    val ranking = analyzer.centralityRanking()
     println(ranking.mkString("\n"))
   }
 }

@@ -1,18 +1,15 @@
 package facebook
 
 import graph.Graph
-import java.util.Scanner
 
-object NetworkAnalyzer {
+class NetworkAnalyzer(api: GraphApi) {
   /**
    * Returns a ranking of users based on their centrality value.
-   * @param token An access token of a logged in user.
    * @return
    */
-  def centralityRanking(token: String): List[User] = {
-    val service = new GraphApi(token)
-    val me = service.myself()
-    val friends = service.fetchFriends()
+  def centralityRanking(): List[User] = {
+    val me = api.myself()
+    val friends = api.fetchFriends()
 
     val friendsTree = (new Graph[User]() /: friends) {
       (graph, friend) => graph +(me, friend)
@@ -26,7 +23,7 @@ object NetworkAnalyzer {
     } yield (f1, f2)
 
     val friendship = allPairs.par map {
-      case (f1, f2) => ((f1, f2), service.areFriends(f1.id, f2.id))
+      case (f1, f2) => ((f1, f2), api.areFriends(f1.id, f2.id))
     }
 
     val graph = (friendsTree /: friendship) {
@@ -39,4 +36,3 @@ object NetworkAnalyzer {
     graph.ranking
   }
 }
-
