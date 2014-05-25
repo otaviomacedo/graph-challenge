@@ -4,30 +4,23 @@ import scala.math.min
 import java.util.Scanner
 import scala.io.Source
 
-
-case class Graph(vertices: Set[Long] = Set.empty, edges: Set[(Long, Long)] = Set.empty) {
-  def +(edge: (Long, Long)): Graph = {
-    val (e1, e2) = edge
-    Graph(vertices.+(e1, e2), edges + edge)
+case class Graph[V](vertices: Set[V] = Set.empty[V], edges: Set[(V, V)] = Set.empty[(V, V)]) {
+  def +(edge: (V, V)): Graph[V] = {
+    val (v1, v2) = edge
+    Graph(vertices.+(v1, v2), edges + edge)
   }
 
-  private val numberOfVertices: Int = vertices.size
-  private val range = 0L until numberOfVertices
   private val Infinity: Long = Long.MaxValue / 2
 
   lazy val lengths = {
-    var pathLengths: Map[(Long, Long), Long] = Map()
+    var pathLengths: Map[(V, V), Long] = Map()
 
-    def distance(i: Long, j: Long): Long =
-      pathLengths.get((i, j)) orElse pathLengths.get((j,i)) getOrElse Infinity
+    def distance(i: V, j: V): Long =
+      pathLengths.get((i, j)) orElse pathLengths.get((j, i)) getOrElse Infinity
 
-    /*
-    Assuming the graph is undirected, the distance between vertices is
-    commutative. So, there is only the need to compute a triangular matrix here.
-     */
     for {
-      i <- range
-      j <- i until numberOfVertices
+      i <- vertices
+      j <- vertices
     } {
       val weight: Long =
         if (i == j) 0
@@ -36,37 +29,38 @@ case class Graph(vertices: Set[Long] = Set.empty, edges: Set[(Long, Long)] = Set
       pathLengths += ((i, j) -> weight)
     }
 
-    /*
-     Floyd­Warshall algorithm
-     */
+    // Floyd­Warshall algorithm
     for {
-      k <- range
-      i <- range
-      j <- range
+      k <- vertices
+      i <- vertices
+      j <- vertices
     } {
-      val distance1: Long = distance(i, j)
-      val distance2: Long = distance(i, k) + distance(k, j)
+      val distance1 = distance(i, j)
+      val distance2 = distance(i, k) + distance(k, j)
       pathLengths = pathLengths + ((i, j) -> min(distance1, distance2))
     }
 
     pathLengths
   }
 
-  def farness(vertex: Long): Long = {
-    val seq = range map {
-      v => lengths get(vertex, v) getOrElse Infinity
+  def farness(vertex: V): Long = {
+    val seq = (List.empty[Long] /: vertices) {
+      (list, v) => (lengths.get((vertex, v)) getOrElse Infinity) :: list
     }
+
     seq.sum
   }
 
-  def closeness(vertex: Long): Double = 1.0 / farness(vertex)
+  def closeness(vertex: V): Double = 1.0 / farness(vertex)
 
   /*
   Since f(x) = 1/x is a strictly decreasing function, we can replace it by a
   less expensive function that is also strictly decreasing. In this case,
   f(x) = -x
    */
-  lazy val rank = range.sortBy(v => -farness(v))
+  lazy val ranking = vertices.toList.sortBy(v => -farness(v))
+
+  lazy val cl = ranking.map(closeness)
 }
 
 
@@ -84,12 +78,12 @@ object Centrality extends App {
     val sc = new Scanner(System.in)
     val filename = sc.nextLine()
     val edges = Source.fromFile(filename).getLines() map makeEdge
-    (new Graph() /: edges)(_ + _)
+    (new Graph[Long]() /: edges)(_ + _)
   } catch {
     case e: Exception =>
       println(s"Could not process the graph.")
       new Graph()
   }
 
-  println(graph.rank)
+  println(graph.ranking)
 }
