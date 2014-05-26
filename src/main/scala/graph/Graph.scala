@@ -38,8 +38,7 @@ case class Graph[V](vertices: Set[V] = Set.empty[V],
   private lazy val lengths = {
     var pathLengths: Map[(V, V), Long] = Map()
 
-    def distance(i: V, j: V): Long =
-      pathLengths.get((i, j)) orElse pathLengths.get((j, i)) getOrElse Infinity
+    def distance(i: V, j: V): Long = pathLengths get(i, j) getOrElse Infinity
 
     // Floyd­Warshall algorithm
     for {
