@@ -21,16 +21,11 @@ class NetworkAnalyzer(api: GraphApi) {
       if f1.id < f2.id
     } yield (f1, f2)
 
-    val friendship = allPairs.par map {
-      case (f1, f2) => ((f1, f2), api.areFriends(f1.id, f2.id))
+    val friendship = allPairs.par filter {
+      case (f1, f2) => api.areFriends(f1.id, f2.id)
     }
 
-    val graph = (friendsTree /: friendship) {
-      (graph, relation) =>
-        val (pair, areFriends) = relation
-        if (areFriends) graph + pair
-        else graph
-    }
+    val graph = (friendsTree /: friendship)(_ + _)
 
     graph.ranking
   }
