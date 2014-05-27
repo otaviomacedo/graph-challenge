@@ -38,20 +38,18 @@ case class Graph[V](vertices: Set[V] = Set.empty[V],
   private lazy val lengths = {
     var pathLengths: Map[(V, V), Long] = Map()
 
-    def distance(i: V, j: V): Long = pathLengths get(i, j) getOrElse Infinity
-
-    // Floyd­Warshall algorithm
-    for {
-      i <- vertices
-      j <- vertices
-    } {
-      val weight: Long =
-        if (i == j) 0
-        else if (edges.contains((i, j)) || edges.contains((j, i))) 1
+    def distance(i: V, j: V): Long = {
+      lazy val adjacentDistance =
+        if (edges.contains((i, j)) || edges.contains((j, i))) 1
         else Infinity
-      pathLengths += ((i, j) -> weight)
+
+      if (i == j) 0
+      else pathLengths.get((i, j)) orElse
+        pathLengths.get((j, i)) getOrElse
+        adjacentDistance
     }
 
+    // Floyd­Warshall algorithm
     for {
       k <- vertices
       i <- vertices
